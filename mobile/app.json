@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Native Multimodel AI Workbench",
+    "slug": "native-multimodel-ai-workbench",
+    "scheme": "native-ai-workbench",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.openwebui.nativeworkbench"
+    },
+    "android": {
+      "package": "com.openwebui.nativeworkbench"
+    }
+  }
+}
