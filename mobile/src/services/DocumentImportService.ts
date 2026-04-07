@@ -1,4 +1,5 @@
 import { extractDocumentText } from '../core/rag/import/extractText'
+import { extractTextFromFile } from '../core/rag/import/extractTextFromFile'
 import type { ExtractedDocumentText, SupportedRagFileType } from '../core/rag/types'
 
 type ImportDocumentInput = {
@@ -79,11 +80,7 @@ export class DocumentImportService {
     repository,
     createId = createRandomId,
     now = () => Date.now(),
-    extractText: extractTextDependency = async () =>
-      extractDocumentText({
-        fileType: 'txt',
-        rawText: ''
-      })
+    extractText: extractTextDependency = extractTextFromFile
   }: DocumentImportServiceDeps) {
     this.store = store
     this.repository = repository

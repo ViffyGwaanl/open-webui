@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { CompareComposerOptions } from '../compare/CompareComposerOptions'
 
-type ComposerMode = 'single' | 'compare'
+type ComposerMode = 'single' | 'compare' | 'rag'
 
 type MessageComposerProps = {
   value: string
@@ -11,6 +11,7 @@ type MessageComposerProps = {
   mode?: ComposerMode
   onModeChange?: (mode: ComposerMode) => void
   canCompare?: boolean
+  canUseRag?: boolean
 }
 
 export function MessageComposer({
@@ -19,7 +20,8 @@ export function MessageComposer({
   onSend,
   mode = 'single',
   onModeChange,
-  canCompare = false
+  canCompare = false,
+  canUseRag = false
 }: MessageComposerProps) {
   return (
     <View style={styles.container}>
@@ -40,6 +42,16 @@ export function MessageComposer({
             >
               <Text style={[styles.modeLabel, mode === 'compare' ? styles.modeLabelSelected : null]}>
                 Compare
+              </Text>
+            </Pressable>
+          ) : null}
+          {canUseRag ? (
+            <Pressable
+              onPress={() => onModeChange('rag')}
+              style={[styles.modeButton, mode === 'rag' ? styles.modeButtonSelected : null]}
+            >
+              <Text style={[styles.modeLabel, mode === 'rag' ? styles.modeLabelSelected : null]}>
+                RAG
               </Text>
             </Pressable>
           ) : null}

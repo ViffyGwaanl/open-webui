@@ -1,22 +1,59 @@
-import { StyleSheet, Text, View } from 'react-native'
+import * as DocumentPicker from 'expo-document-picker'
+import { Alert } from 'react-native'
+import { useEffect, useState } from 'react'
 
-export default function LibraryScreen() {
+import { LibraryScreen } from '../../../src/features/library/LibraryScreen'
+import { RagSingleTurnExecutionService } from '../../../src/services/RagSingleTurnExecutionService'
+
+const ragService = new RagSingleTurnExecutionService()
+
+export default function LibraryIndexScreen() {
+  const [documents, setDocuments] = useState<
+    Array<{
+      id: string
+      displayName: string
+      fileType: string
+      indexStatus: string
+      textLength: number
+      pageCount: number | null
+    }>
+  >([])
+
+  const loadDocuments = async () => {
+    setDocuments(await ragService.listDocuments())
+  }
+
+  useEffect(() => {
+    void loadDocuments()
+  }, [])
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Library</Text>
-    </View>
+    <LibraryScreen
+      documents={documents}
+      onImportPress={async () => {
+        try {
+          const result = await DocumentPicker.getDocumentAsync({
+            type: ['text/plain', 'text/markdown', 'application/pdf'],
+            copyToCacheDirectory: true,
+            multiple: false
+          })
+
+          if (result.canceled || result.assets.length === 0) {
+            return
+          }
+
+          const [asset] = result.assets
+
+          await ragService.importDocument({
+            uri: asset.uri,
+            name: asset.name,
+            mimeType: asset.mimeType
+          })
+          await loadDocuments()
+        } catch (error) {
+          Alert.alert('Import failed', error instanceof Error ? error.message : 'Unknown error')
+        }
+      }}
+    />
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600'
-  }
-})
