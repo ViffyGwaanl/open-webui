@@ -1,4 +1,8 @@
 export { appPreferences } from './appPreferences'
+export { compareBranches } from './compareBranches'
+export { comparePresets } from './comparePresets'
+export { compareRuns } from './compareRuns'
+export { judgeRuns } from './judgeRuns'
 export { modelCatalog } from './modelCatalog'
 export { providerProfiles } from './providerProfiles'
 export { threads } from './threads'
