@@ -1,0 +1,14 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "Compare"
+- tapOn: "Ask anything"
+- inputText: "Choose the strongest branch and continue it."
+- tapOn: "Send"
+- assertVisible: "Continue"
+- tapOn: "Continue"
+- assertVisible: "Review Demo Balanced"

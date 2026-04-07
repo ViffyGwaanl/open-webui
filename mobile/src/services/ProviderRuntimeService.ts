@@ -55,7 +55,7 @@ function createDefaultProfileRepository(): ProviderProfileRepositoryLike {
 }
 
 function normalizePreset(value: string): ProviderPreset {
-  if (value === 'openai' || value === 'gemini' || value === 'claude') {
+  if (value === 'openai' || value === 'gemini' || value === 'claude' || value === 'review-demo') {
     return value
   }
 
@@ -138,8 +138,11 @@ export class ProviderRuntimeService {
       throw new Error(`Provider profile ${providerProfileId} not found`)
     }
 
-    const apiKey = await loadRequiredApiKey(this.apiKeyStore, profile.apiKeyRef)
     const adapter = this.registry.resolve(normalizePreset(profile.presetType))
+    const apiKey =
+      profile.presetType === 'review-demo'
+        ? ''
+        : await loadRequiredApiKey(this.apiKeyStore, profile.apiKeyRef)
 
     return {
       profile,

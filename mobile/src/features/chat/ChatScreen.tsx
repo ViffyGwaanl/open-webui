@@ -2,11 +2,13 @@ import { Alert, useWindowDimensions } from 'react-native'
 import { useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
+import { normalizeProviderError } from '../../core/errors/normalizeProviderError'
 import type { RetrievalContext } from '../../core/rag/types'
-import type { ThreadTimelineItem } from '../../services/ThreadService'
+import type { ThreadTimelineCompareRunItem, ThreadTimelineItem } from '../../services/ThreadService'
 import { AdaptivePane } from '../../ui/layout/AdaptivePane'
 import type { WorkspaceLayout } from '../../ui/layout/useWorkspaceLayout'
 import { getWorkspaceLayout } from '../../ui/layout/useWorkspaceLayout'
+import type { ActiveComparePresetSummary } from '../compare/CompareComposerOptions'
 import { MessageComposer } from './MessageComposer'
 import { MessageList } from './MessageList'
 import { RagContextSheet } from './RagContextSheet'
@@ -25,6 +27,14 @@ type ChatScreenProps = {
   }) => Promise<RetrievalContext>
   runCompareTurn?: (args: { threadId: string; prompt: string }) => Promise<void>
   loadTimeline?: (threadId: string) => Promise<ThreadTimelineItem[]>
+  onContinueCompareBranch?: (input: { compareRunId: string; branchId: string }) => Promise<void> | void
+  onCopyCompareBranch?: (input: {
+    compareRunId: string
+    branchId: string
+    text: string
+  }) => Promise<void> | void
+  onExportCompareRun?: (run: ThreadTimelineCompareRunItem) => Promise<void> | void
+  activeComparePreset?: ActiveComparePresetSummary | null
   layout?: WorkspaceLayout
 }
 
@@ -34,6 +44,10 @@ export function ChatScreen({
   runSingleTurnWithRag,
   runCompareTurn,
   loadTimeline,
+  onContinueCompareBranch,
+  onCopyCompareBranch,
+  onExportCompareRun,
+  activeComparePreset = null,
   layout: explicitLayout
 }: ChatScreenProps) {
   const windowDimensions = useWindowDimensions()
@@ -61,7 +75,12 @@ export function ChatScreen({
         layout={layout}
         primary={
           <View style={styles.primaryPane}>
-            <MessageList items={items} />
+            <MessageList
+              items={items}
+              onContinueCompareBranch={onContinueCompareBranch}
+              onCopyCompareBranch={onCopyCompareBranch}
+              onExportCompareRun={onExportCompareRun}
+            />
             {lastRagContext ? <RagEvidenceBadge context={lastRagContext} /> : null}
             {lastRagContext ? <RagContextSheet context={lastRagContext} /> : null}
             <MessageComposer
@@ -71,6 +90,7 @@ export function ChatScreen({
               onModeChange={setMode}
               canCompare={Boolean(runCompareTurn)}
               canUseRag={Boolean(runSingleTurnWithRag)}
+              activeComparePreset={activeComparePreset}
               onSend={async () => {
                 try {
                   if (mode === 'compare' && runCompareTurn) {
@@ -108,10 +128,11 @@ export function ChatScreen({
                       }
                     })
                     await refreshTimeline()
-                  }
+                }
                   setPrompt('')
                 } catch (error) {
-                  Alert.alert('Request failed', error instanceof Error ? error.message : 'Unknown error')
+                  const normalizedError = normalizeProviderError(error)
+                  Alert.alert(normalizedError.title, normalizedError.message)
                 }
               }}
             />

@@ -7,15 +7,16 @@ import type { LibraryDocumentSummary } from './DocumentRow'
 type LibraryScreenProps = {
   documents: LibraryDocumentSummary[]
   onImportPress: () => void | Promise<void>
+  onSelectDocument?: (documentId: string) => void
 }
 
-export function LibraryScreen({ documents, onImportPress }: LibraryScreenProps) {
+export function LibraryScreen({ documents, onImportPress, onSelectDocument }: LibraryScreenProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Library</Text>
       <Text style={styles.body}>Import local text, markdown, and PDF sources for on-device retrieval.</Text>
       <DocumentImportButton onPress={onImportPress} />
-      <DocumentList documents={documents} />
+      <DocumentList documents={documents} onSelectDocument={onSelectDocument} />
     </View>
   )
 }

@@ -103,7 +103,8 @@ export class RagSingleTurnExecutionService {
           }
         },
         replaceDocumentChunks: (documentId, chunks) => this.indexRepository.replaceDocumentChunks(documentId, chunks),
-        updateIndexJob: (jobId, patch) => this.indexRepository.updateIndexJob(jobId, patch)
+        updateIndexJob: (jobId, patch) => this.indexRepository.updateIndexJob(jobId, patch),
+        updateDocument: (documentId, patch) => this.indexRepository.updateDocument(documentId, patch)
       },
       embeddingGateway: this.providerRuntimeService
     })

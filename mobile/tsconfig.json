@@ -4,5 +4,5 @@
     "strict": true,
     "baseUrl": "."
   },
-  "include": ["app", "src"]
+  "include": ["app", "src", "modules"]
 }

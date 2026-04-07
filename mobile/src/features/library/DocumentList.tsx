@@ -2,11 +2,21 @@ import { StyleSheet, View } from 'react-native'
 
 import { DocumentRow, type LibraryDocumentSummary } from './DocumentRow'
 
-export function DocumentList({ documents }: { documents: LibraryDocumentSummary[] }) {
+export function DocumentList({
+  documents,
+  onSelectDocument
+}: {
+  documents: LibraryDocumentSummary[]
+  onSelectDocument?: (documentId: string) => void
+}) {
   return (
     <View style={styles.list}>
       {documents.map((document) => (
-        <DocumentRow key={document.id} document={document} />
+        <DocumentRow
+          key={document.id}
+          document={document}
+          onPress={onSelectDocument}
+        />
       ))}
     </View>
   )

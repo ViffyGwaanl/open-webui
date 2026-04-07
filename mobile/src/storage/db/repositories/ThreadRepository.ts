@@ -1,10 +1,12 @@
 import { and, asc, desc, eq, type InferInsertModel, type InferSelectModel } from 'drizzle-orm'
 
 import { db } from '../client'
-import { turns } from '../schema'
+import { threads, turns } from '../schema'
 
 export type TurnRecord = InferSelectModel<typeof turns>
 export type NewTurnRecord = InferInsertModel<typeof turns>
+export type ThreadRecord = InferSelectModel<typeof threads>
+export type NewThreadRecord = InferInsertModel<typeof threads>
 
 type TurnUpdatePatch = Partial<
   Pick<TurnRecord, 'contentJson' | 'status' | 'usageJson' | 'updatedAt' | 'providerProfileId' | 'modelId'>
@@ -13,8 +15,21 @@ type TurnUpdatePatch = Partial<
 export class ThreadRepository {
   constructor(private readonly database = db) {}
 
+  async createThread(record: NewThreadRecord) {
+    await this.database.insert(threads).values(record)
+    return { id: record.id }
+  }
+
   async insertTurn(record: NewTurnRecord) {
     await this.database.insert(turns).values(record)
+  }
+
+  async insertTurns(records: NewTurnRecord[]) {
+    if (records.length === 0) {
+      return
+    }
+
+    await this.database.insert(turns).values(records)
   }
 
   async findLatestAssistantTurn(threadId: string): Promise<TurnRecord | null> {

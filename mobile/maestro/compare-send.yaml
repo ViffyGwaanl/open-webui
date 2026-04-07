@@ -1,0 +1,15 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "Compare"
+- tapOn: "Ask anything"
+- inputText: "Compare the best mobile release tradeoffs."
+- tapOn: "Send"
+- assertVisible: "Judge Summary"
+- assertVisible: "review-demo-balanced"
+- assertVisible: "review-demo-critic"
+- assertVisible: "review-demo-creative"

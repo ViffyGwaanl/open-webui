@@ -103,8 +103,52 @@ export class RagIndexRepository {
       .where(eq(documents.id, documentId))
   }
 
-  async updateIndexJob(jobId: string, patch: { status: string; updatedAt?: number }) {
+  async updateIndexJob(jobId: string, patch: {
+    status: string
+    attemptCount?: number
+    lastErrorJson?: string
+    lastProgressAt?: number | null
+    updatedAt?: number
+  }) {
     await this.database.update(indexJobs).set(patch).where(eq(indexJobs.id, jobId))
+  }
+
+  async updateDocument(
+    documentId: string,
+    patch: {
+      indexStatus?: string
+      updatedAt?: number
+    }
+  ) {
+    await this.database.update(documents).set(patch).where(eq(documents.id, documentId))
+  }
+
+  async findInterruptedJobs() {
+    const jobs = await this.database
+      .select()
+      .from(indexJobs)
+      .where(eq(indexJobs.status, 'running'))
+
+    if (jobs.length === 0) {
+      return []
+    }
+
+    return Promise.all(
+      jobs.map(async (job) => {
+        const [document] = await this.database
+          .select()
+          .from(documents)
+          .where(eq(documents.id, job.documentId))
+          .limit(1)
+
+        return document
+          ? {
+              job: { id: job.id, status: job.status },
+              document: { id: document.id, indexStatus: document.indexStatus }
+            }
+          : null
+      })
+    ).then((records) => records.filter((record) => record !== null))
   }
 
   async searchKeywordCandidates(query: string) {

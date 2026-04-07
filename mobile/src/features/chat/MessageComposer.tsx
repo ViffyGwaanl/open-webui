@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { CompareComposerOptions } from '../compare/CompareComposerOptions'
+import { CompareComposerOptions, type ActiveComparePresetSummary } from '../compare/CompareComposerOptions'
 
 type ComposerMode = 'single' | 'compare' | 'rag'
 
@@ -12,6 +12,7 @@ type MessageComposerProps = {
   onModeChange?: (mode: ComposerMode) => void
   canCompare?: boolean
   canUseRag?: boolean
+  activeComparePreset?: ActiveComparePresetSummary | null
 }
 
 export function MessageComposer({
@@ -21,7 +22,8 @@ export function MessageComposer({
   mode = 'single',
   onModeChange,
   canCompare = false,
-  canUseRag = false
+  canUseRag = false,
+  activeComparePreset = null
 }: MessageComposerProps) {
   return (
     <View style={styles.container}>
@@ -57,7 +59,7 @@ export function MessageComposer({
           ) : null}
         </View>
       ) : null}
-      {mode === 'compare' ? <CompareComposerOptions /> : null}
+      {mode === 'compare' ? <CompareComposerOptions activePreset={activeComparePreset} /> : null}
       <TextInput
         placeholder="Ask anything"
         value={value}

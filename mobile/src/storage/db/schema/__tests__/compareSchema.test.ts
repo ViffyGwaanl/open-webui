@@ -10,6 +10,7 @@ describe('compare schema', () => {
     expect(comparePresets.id).toBeDefined()
     expect(compareRuns.promptTurnId).toBeDefined()
     expect(compareBranches.compareRunId).toBeDefined()
+    expect(compareBranches.continuationThreadId).toBeDefined()
     expect(judgeRuns.compareRunId).toBeDefined()
   })
 })

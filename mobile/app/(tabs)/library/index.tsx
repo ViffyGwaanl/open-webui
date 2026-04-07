@@ -1,4 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker'
+import { router } from 'expo-router'
 import { Alert } from 'react-native'
 import { useEffect, useState } from 'react'
 
@@ -53,6 +54,9 @@ export default function LibraryIndexScreen() {
         } catch (error) {
           Alert.alert('Import failed', error instanceof Error ? error.message : 'Unknown error')
         }
+      }}
+      onSelectDocument={(documentId) => {
+        router.push(`/library/${documentId}`)
       }}
     />
   )

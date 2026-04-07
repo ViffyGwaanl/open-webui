@@ -1,6 +1,6 @@
 import type { StreamSink } from '../chat/streamEvents'
 
-export type ProviderPreset = 'openai' | 'gemini' | 'claude'
+export type ProviderPreset = 'openai' | 'gemini' | 'claude' | 'review-demo'
 
 export type ProviderProfileInput = {
   id: string

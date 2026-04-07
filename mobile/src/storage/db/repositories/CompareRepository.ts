@@ -26,6 +26,7 @@ export type TimelineCompareBranch = {
   usageJson: string
   latencyMs: number | null
   errorJson: string
+  continuationThreadId: string | null
 }
 
 export type TimelineCompareRunCard = {
@@ -57,12 +58,65 @@ function mapBranch(branch: CompareBranchRecord): TimelineCompareBranch {
     text: parseTextContent(branch.contentJson),
     usageJson: branch.usageJson,
     latencyMs: branch.latencyMs,
-    errorJson: branch.errorJson
+    errorJson: branch.errorJson,
+    continuationThreadId: branch.continuationThreadId ?? null
   }
 }
 
 export class CompareRepository {
   constructor(private readonly database = db) {}
+
+  async findIncompleteRuns() {
+    const runs = await this.database
+      .select()
+      .from(compareRuns)
+      .where(inArray(compareRuns.status, ['queued', 'running']))
+
+    if (runs.length === 0) {
+      return []
+    }
+
+    const runIds = runs.map((run) => run.id)
+    const branches = await this.database
+      .select()
+      .from(compareBranches)
+      .where(inArray(compareBranches.compareRunId, runIds))
+    const judges = await this.database
+      .select()
+      .from(judgeRuns)
+      .where(inArray(judgeRuns.compareRunId, runIds))
+
+    return runs.map((run) => ({
+      run: { id: run.id, status: run.status },
+      branches: branches
+        .filter((branch) => branch.compareRunId === run.id)
+        .map((branch) => ({ id: branch.id, status: branch.status })),
+      judge:
+        judges
+          .filter((judge) => judge.compareRunId === run.id)
+          .sort((left, right) => right.createdAt - left.createdAt)[0] ?? null
+    }))
+  }
+
+  async findRunById(compareRunId: string): Promise<CompareRunRecord | null> {
+    const [run] = await this.database
+      .select()
+      .from(compareRuns)
+      .where(eq(compareRuns.id, compareRunId))
+      .limit(1)
+
+    return run ?? null
+  }
+
+  async findBranchById(branchId: string): Promise<CompareBranchRecord | null> {
+    const [branch] = await this.database
+      .select()
+      .from(compareBranches)
+      .where(eq(compareBranches.id, branchId))
+      .limit(1)
+
+    return branch ?? null
+  }
 
   async insertRun(record: NewCompareRunRecord) {
     await this.database.insert(compareRuns).values(record)
@@ -99,7 +153,14 @@ export class CompareRepository {
     patch: Partial<
       Pick<
         CompareBranchRecord,
-        'status' | 'contentJson' | 'usageJson' | 'latencyMs' | 'errorJson' | 'attemptCount' | 'updatedAt'
+        | 'status'
+        | 'contentJson'
+        | 'usageJson'
+        | 'latencyMs'
+        | 'errorJson'
+        | 'continuationThreadId'
+        | 'attemptCount'
+        | 'updatedAt'
       >
     >
   ) {

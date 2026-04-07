@@ -1,0 +1,12 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- assertVisible: "Single"
+- tapOn: "Ask anything"
+- inputText: "Summarize the local-first mobile release path."
+- tapOn: "Send"
+- assertVisible: "Review Demo Balanced"

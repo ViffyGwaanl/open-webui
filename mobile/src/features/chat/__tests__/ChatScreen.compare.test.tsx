@@ -51,4 +51,46 @@ describe('ChatScreen compare mode', () => {
     expect(await screen.findByText('Candidate 1 wins.')).toBeTruthy()
     expect(await screen.findByText('Answer A')).toBeTruthy()
   })
+
+  it('forwards compare branch continuation actions from the compare card', async () => {
+    const onContinueCompareBranch = jest.fn(async () => {})
+
+    render(
+      <ChatScreen
+        threadId="thread-1"
+        runSingleTurn={async () => {}}
+        runCompareTurn={async () => {}}
+        onContinueCompareBranch={onContinueCompareBranch}
+        loadTimeline={async () => [
+          {
+            id: 'compare-1',
+            kind: 'compare_run',
+            promptTurnId: 'turn-user-1',
+            status: 'completed',
+            judgeSummary: null,
+            branches: [
+              {
+                id: 'branch-1',
+                providerProfileId: 'openai-main',
+                modelId: 'gpt-4.1',
+                status: 'completed',
+                text: 'Answer A',
+                usageJson: '{}',
+                latencyMs: 120,
+                errorJson: '{}',
+                continuationThreadId: null
+              }
+            ]
+          }
+        ]}
+      />
+    )
+
+    fireEvent.press(await screen.findByText('Continue'))
+
+    expect(onContinueCompareBranch).toHaveBeenCalledWith({
+      compareRunId: 'compare-1',
+      branchId: 'branch-1'
+    })
+  })
 })

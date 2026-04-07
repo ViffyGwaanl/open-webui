@@ -14,7 +14,12 @@ async function ensureBootstrapped() {
     bootstrapPromise = Promise.all([
       import('../storage/db/migrate').then(({ runMigrations }) => runMigrations()),
       import('../storage/index-db/migrate').then(({ runIndexMigrations }) => runIndexMigrations())
-    ]).then(() => undefined)
+    ])
+      .then(async () => {
+        const { RecoveryService } = await import('../services/RecoveryService')
+        await new RecoveryService().reconcileOnLaunch()
+      })
+      .then(() => undefined)
   }
 
   return bootstrapPromise

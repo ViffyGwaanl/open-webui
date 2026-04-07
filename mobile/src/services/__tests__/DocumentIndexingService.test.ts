@@ -19,7 +19,7 @@ describe('DocumentIndexingService', () => {
       })),
       replaceDocumentChunks: jest.fn(async () => {}),
       updateIndexJob: jest.fn(async () => {}),
-      now: () => 200
+      updateDocument: jest.fn(async () => {})
     }
     const embeddingGateway = {
       embedTexts: jest.fn(async ({ texts }: { texts: string[] }) => texts.map(() => [0.1, 0.2, 0.3]))
@@ -36,6 +36,10 @@ describe('DocumentIndexingService', () => {
 
     await service.indexDocument('doc-1')
 
+    expect(repository.updateDocument).toHaveBeenCalledWith(
+      'doc-1',
+      expect.objectContaining({ indexStatus: 'indexing' })
+    )
     expect(embeddingGateway.embedTexts).toHaveBeenCalled()
     expect(repository.replaceDocumentChunks).toHaveBeenCalledWith(
       'doc-1',

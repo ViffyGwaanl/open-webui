@@ -23,6 +23,7 @@ type ContinuationSource = {
     providerProfileId: string
     modelId: string
     contentJson: string
+    continuationThreadId: string | null
   }
 }
 
@@ -41,10 +42,11 @@ type Repositories = {
     updatedAt: number
   }) => Promise<{ id: string }>
   insertTurns: (threadId: string, turns: ContinuationSourceTurn[]) => Promise<void>
+  linkContinuationThread: (branchId: string, threadId: string) => Promise<void>
 }
 
 type BranchContinuationServiceDeps = {
-  repositories: Repositories
+  repositories?: Repositories
   createId?: () => string
   now?: () => number
 }
@@ -65,12 +67,73 @@ function createRandomId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+function createDefaultRepositories(): Repositories {
+  const { CompareRepository } = require('../storage/db/repositories/CompareRepository') as typeof import('../storage/db/repositories/CompareRepository')
+  const { ThreadRepository } = require('../storage/db/repositories/ThreadRepository') as typeof import('../storage/db/repositories/ThreadRepository')
+
+  const compareRepository = new CompareRepository()
+  const threadRepository = new ThreadRepository()
+
+  return {
+    loadContinuationSource: async ({ threadId, compareRunId, branchId }) => {
+      const run = await compareRepository.findRunById(compareRunId)
+      const branch = await compareRepository.findBranchById(branchId)
+      const turns = await threadRepository.listTurns(threadId)
+
+      if (!run || run.threadId !== threadId) {
+        throw new Error(`Compare run ${compareRunId} does not belong to thread ${threadId}`)
+      }
+
+      if (!branch || branch.compareRunId !== compareRunId) {
+        throw new Error(`Compare branch ${branchId} does not belong to compare run ${compareRunId}`)
+      }
+
+      const promptTurnIndex = turns.findIndex((turn) => turn.id === run.promptTurnId)
+
+      if (promptTurnIndex < 0) {
+        throw new Error(`Prompt turn ${run.promptTurnId} is missing from thread ${threadId}`)
+      }
+
+      const promptTurn = turns[promptTurnIndex]
+
+      return {
+        promptTurn: {
+          id: promptTurn.id,
+          contentJson: promptTurn.contentJson,
+          createdAt: promptTurn.createdAt
+        },
+        parentTurns: turns.slice(0, promptTurnIndex + 1).map((turn) => ({
+          ...turn,
+          role: turn.role as 'user' | 'assistant'
+        })),
+        branch: {
+          id: branch.id,
+          providerProfileId: branch.providerProfileId,
+          modelId: branch.modelId,
+          contentJson: branch.contentJson,
+          continuationThreadId: branch.continuationThreadId ?? null
+        }
+      }
+    },
+    createThread: async (record) => threadRepository.createThread(record),
+    insertTurns: async (_threadId, turns) => {
+      await threadRepository.insertTurns(turns as never)
+    },
+    linkContinuationThread: async (branchId, threadId) => {
+      await compareRepository.updateBranch(branchId, {
+        continuationThreadId: threadId,
+        updatedAt: Date.now()
+      })
+    }
+  }
+}
+
 export class BranchContinuationService {
   private readonly repositories: Repositories
   private readonly createId: () => string
   private readonly now: () => number
 
-  constructor({ repositories, createId = createRandomId, now = () => Date.now() }: BranchContinuationServiceDeps) {
+  constructor({ repositories = createDefaultRepositories(), createId = createRandomId, now = () => Date.now() }: BranchContinuationServiceDeps = {}) {
     this.repositories = repositories
     this.createId = createId
     this.now = now
@@ -82,6 +145,15 @@ export class BranchContinuationService {
     branchId: string
   }) {
     const source = await this.repositories.loadContinuationSource(input)
+
+    if (source.branch.continuationThreadId) {
+      return {
+        id: source.branch.continuationThreadId,
+        sourceThreadId: input.threadId,
+        sourceBranchId: input.branchId
+      }
+    }
+
     const createdAt = this.now()
     const title = parseTextContent(source.promptTurn.contentJson) || 'Continued branch'
     const childThreadId = this.createId()
@@ -97,7 +169,7 @@ export class BranchContinuationService {
 
     const copiedTurns = source.parentTurns.map((turn) => ({
       ...turn,
-      id: `${turn.id}-copy`,
+      id: this.createId(),
       threadId: childThread.id
     }))
     const assistantTurnCreatedAt = this.now()
@@ -115,6 +187,7 @@ export class BranchContinuationService {
     }
 
     await this.repositories.insertTurns(childThread.id, [...copiedTurns, branchAssistantTurn])
+    await this.repositories.linkContinuationThread(input.branchId, childThread.id)
 
     return {
       id: childThread.id,

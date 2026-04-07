@@ -1,0 +1,14 @@
+appId: com.openwebui.mobile
+env:
+  OPENAI_API_KEY: ""
+---
+- launchApp
+- tapOn: "Settings"
+- assertVisible: "Settings"
+- tapOn: "Install Review Demo"
+- assertVisible: "Review Demo"
+- tapOn: "OpenAI"
+- tapOn: "API key"
+- inputText: "${OPENAI_API_KEY}"
+- tapOn: "Save provider"
+- assertVisible: "OpenAI Main"

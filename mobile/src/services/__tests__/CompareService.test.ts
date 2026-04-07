@@ -44,6 +44,18 @@ describe('CompareService', () => {
     const result = await service.startRun({
       threadId: 'thread-1',
       prompt: 'Compare these answers',
+      retrievalContext: {
+        snippets: [
+          {
+            id: 'chunk-1',
+            documentId: 'doc-1',
+            sourceLabel: 'guide.md',
+            snippetText: 'Architecture note',
+            sectionTitle: 'Intro',
+            pageNumber: null
+          }
+        ]
+      },
       branches: [
         {
           providerProfileId: 'openai-main',
@@ -81,7 +93,17 @@ describe('CompareService', () => {
       expect.objectContaining({
         id: 'compare-run-1',
         promptTurnId: 'turn-user-1',
-        status: 'running'
+        status: 'running',
+        retrievalContextJson: JSON.stringify([
+          {
+            id: 'chunk-1',
+            documentId: 'doc-1',
+            sourceLabel: 'guide.md',
+            snippetText: 'Architecture note',
+            sectionTitle: 'Intro',
+            pageNumber: null
+          }
+        ])
       })
     )
     expect(compareRepository.insertBranches).toHaveBeenCalledWith(

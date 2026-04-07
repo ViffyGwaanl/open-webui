@@ -1,0 +1,10 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Library"
+- assertVisible: "review-demo-guide.md"
+- tapOn: "review-demo-guide.md"
+- assertVisible: "Excerpt"
+- assertVisible: "Status: completed"

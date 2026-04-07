@@ -1,0 +1,16 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "Compare"
+- tapOn: "Ask anything"
+- inputText: "Create a compare run that should survive app relaunch."
+- tapOn: "Send"
+- stopApp
+- launchApp
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- assertVisible: "Ask anything"

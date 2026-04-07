@@ -1,0 +1,12 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "Compare"
+- tapOn: "Ask anything"
+- inputText: "Judge which answer is best for a mobile-first local AI app."
+- tapOn: "Send"
+- assertVisible: "Judge Summary"

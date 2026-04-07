@@ -1,6 +1,7 @@
 import { ClaudeAdapter } from './adapters/claude'
 import { GeminiAdapter } from './adapters/gemini'
 import { OpenAIAdapter } from './adapters/openai'
+import { ReviewDemoAdapter } from './adapters/reviewDemo'
 import type { ProviderAdapter, ProviderPreset } from './types'
 
 function assertUnreachable(value: never): never {
@@ -16,6 +17,8 @@ export class ProviderRegistry {
         return new GeminiAdapter()
       case 'claude':
         return new ClaudeAdapter()
+      case 'review-demo':
+        return new ReviewDemoAdapter()
       default:
         return assertUnreachable(presetType)
     }

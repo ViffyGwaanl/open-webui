@@ -1,0 +1,18 @@
+{
+  "prompt": "Compare local-first mobile AI workspace architecture",
+  "judgeSummary": "Balanced is the clearest, Critic is the strictest, Creative is the most user-facing.",
+  "branches": [
+    {
+      "modelId": "review-demo-balanced",
+      "text": "Keep chat, compare, and RAG state local and vendor calls stateless."
+    },
+    {
+      "modelId": "review-demo-critic",
+      "text": "The main risk is incomplete recovery after process death."
+    },
+    {
+      "modelId": "review-demo-creative",
+      "text": "Make evidence review, compare continuation, and backup visible in the UI."
+    }
+  ]
+}

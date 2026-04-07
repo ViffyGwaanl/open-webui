@@ -6,6 +6,7 @@ import { LibraryScreen } from '../LibraryScreen'
 describe('LibraryScreen', () => {
   it('renders imported documents and triggers the import action', () => {
     const onImportPress: () => void = jest.fn()
+    const onSelectDocument: (documentId: string) => void = jest.fn()
 
     render(
       <LibraryScreen
@@ -20,6 +21,7 @@ describe('LibraryScreen', () => {
           }
         ]}
         onImportPress={onImportPress}
+        onSelectDocument={onSelectDocument}
       />
     )
 
@@ -27,7 +29,9 @@ describe('LibraryScreen', () => {
     expect(screen.getByText('completed')).toBeTruthy()
 
     fireEvent.press(screen.getByText('Import Document'))
+    fireEvent.press(screen.getByText('guide.md'))
 
     expect(onImportPress).toHaveBeenCalled()
+    expect(onSelectDocument).toHaveBeenCalledWith('doc-1')
   })
 })

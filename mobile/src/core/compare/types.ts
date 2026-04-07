@@ -54,6 +54,7 @@ export type CompareBranchRecord = {
   usageJson: string
   latencyMs: number | null
   errorJson: string
+  continuationThreadId: string | null
   attemptCount: number
   createdAt: number
   updatedAt: number

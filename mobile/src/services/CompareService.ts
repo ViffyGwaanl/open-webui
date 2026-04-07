@@ -2,6 +2,7 @@ import type { CanonicalStreamEvent, CanonicalUsage } from '../core/chat/types'
 import { aggregateRunMetrics } from '../core/compare/aggregateRunMetrics'
 import { normalizeCompareError } from '../core/compare/compareErrors'
 import { runJudgeRun } from '../core/compare/runJudgeRun'
+import type { RetrievalContext } from '../core/rag/types'
 import { reduceCompareEvent, type CompareRuntimeState } from '../core/compare/stateMachine'
 import type {
   NewCompareBranchRecord,
@@ -33,6 +34,8 @@ type JudgeInput = {
 type StartCompareRunInput = {
   threadId: string
   prompt: string
+  presetId?: string | null
+  retrievalContext?: RetrievalContext
   branches: CompareBranchInput[]
   judge?: JudgeInput
 }
@@ -87,7 +90,7 @@ export class CompareService {
     this.now = now
   }
 
-  async startRun({ threadId, prompt, branches, judge }: StartCompareRunInput) {
+  async startRun({ threadId, prompt, presetId, retrievalContext, branches, judge }: StartCompareRunInput) {
     const promptTurnId = await this.threadService.createUserTurn(threadId, prompt)
     const compareRunId = this.createId()
     const createdAt = this.now()
@@ -96,7 +99,7 @@ export class CompareService {
       threadId,
       promptTurnId,
       status: 'running',
-      presetId: null,
+      presetId: presetId ?? null,
       compareConfigJson: JSON.stringify({
         branchCount: branches.length
       }),
@@ -108,7 +111,7 @@ export class CompareService {
             }
           : {}
       ),
-      retrievalContextJson: '[]',
+      retrievalContextJson: JSON.stringify(retrievalContext?.snippets ?? []),
       aggregateUsageJson: '{}',
       aggregateTimingJson: '{}',
       createdAt,

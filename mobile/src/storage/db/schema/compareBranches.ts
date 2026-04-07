@@ -11,6 +11,7 @@ export const compareBranches = sqliteTable('compare_branches', {
   usageJson: text('usage_json').notNull().default('{}'),
   latencyMs: integer('latency_ms'),
   errorJson: text('error_json').notNull().default('{}'),
+  continuationThreadId: text('continuation_thread_id'),
   attemptCount: integer('attempt_count').notNull().default(1),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull()

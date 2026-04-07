@@ -35,6 +35,7 @@ export type ThreadTimelineTurnItem = {
 
 export type ThreadTimelineCompareRunItem = TimelineCompareRunCard & {
   kind: 'compare_run'
+  promptText?: string
 }
 
 export type ThreadTimelineItem = ThreadTimelineTurnItem | ThreadTimelineCompareRunItem
@@ -165,9 +166,15 @@ export class ThreadService {
     )
 
     return turns.flatMap<ThreadTimelineItem>((turn) => {
-      const items: ThreadTimelineItem[] = [mapTurnToTimelineItem(turn)]
+      const timelineTurn = mapTurnToTimelineItem(turn)
+      const items: ThreadTimelineItem[] = [timelineTurn]
       const anchoredCompareCards = compareCardsByPromptTurnId.get(turn.id) ?? []
-      items.push(...anchoredCompareCards)
+      items.push(
+        ...anchoredCompareCards.map((compareCard) => ({
+          ...compareCard,
+          promptText: timelineTurn.text
+        }))
+      )
       return items
     })
   }

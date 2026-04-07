@@ -1,0 +1,12 @@
+{
+  "snippets": [
+    {
+      "id": "demo-snippet-1",
+      "documentId": "review-demo-guide",
+      "sourceLabel": "review-demo-guide.md",
+      "snippetText": "Local RAG stores imported sources on device and injects shared evidence into answers.",
+      "sectionTitle": "Retrieval",
+      "pageNumber": null
+    }
+  ]
+}

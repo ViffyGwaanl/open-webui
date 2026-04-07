@@ -1,0 +1,14 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "RAG"
+- tapOn: "Ask anything"
+- inputText: "What evidence is stored in the review guide?"
+- tapOn: "Send"
+- assertVisible: "1 source attached"
+- assertVisible: "Retrieved Evidence"
+- assertVisible: "review-demo-guide.md"

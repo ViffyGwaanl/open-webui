@@ -1,0 +1,1 @@
+ALTER TABLE `compare_branches` ADD `continuation_thread_id` text;

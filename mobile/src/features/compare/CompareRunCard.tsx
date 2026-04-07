@@ -3,10 +3,23 @@ import { StyleSheet, View } from 'react-native'
 
 import type { ThreadTimelineCompareRunItem } from '../../services/ThreadService'
 import { BranchPanel } from './BranchPanel'
+import { CompareBranchActions } from './CompareBranchActions'
 import { BranchTabs } from './BranchTabs'
 import { JudgeSummaryCard } from './JudgeSummaryCard'
 
-export function CompareRunCard({ run }: { run: ThreadTimelineCompareRunItem }) {
+type CompareRunCardProps = {
+  run: ThreadTimelineCompareRunItem
+  onContinueBranch?: (branch: ThreadTimelineCompareRunItem['branches'][number]) => void
+  onCopyBranch?: (branch: ThreadTimelineCompareRunItem['branches'][number]) => void
+  onExportRun?: (run: ThreadTimelineCompareRunItem) => void
+}
+
+export function CompareRunCard({
+  run,
+  onContinueBranch,
+  onCopyBranch,
+  onExportRun
+}: CompareRunCardProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(run.branches[0]?.id ?? null)
   const selectedBranch =
     run.branches.find((branch) => branch.id === selectedBranchId) ?? run.branches[0] ?? null
@@ -23,6 +36,13 @@ export function CompareRunCard({ run }: { run: ThreadTimelineCompareRunItem }) {
         selectedBranchId={selectedBranchId}
         onSelect={setSelectedBranchId}
       />
+      {selectedBranch ? (
+        <CompareBranchActions
+          onContinue={onContinueBranch ? () => onContinueBranch(selectedBranch) : undefined}
+          onCopy={onCopyBranch ? () => onCopyBranch(selectedBranch) : undefined}
+          onExport={onExportRun ? () => onExportRun(run) : undefined}
+        />
+      ) : null}
       {selectedBranch ? <BranchPanel branch={selectedBranch} /> : null}
     </View>
   )

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text } from 'react-native'
 
 import { IndexJobBadge } from './IndexJobBadge'
 
@@ -11,15 +11,21 @@ export type LibraryDocumentSummary = {
   pageCount: number | null
 }
 
-export function DocumentRow({ document }: { document: LibraryDocumentSummary }) {
+export function DocumentRow({
+  document,
+  onPress
+}: {
+  document: LibraryDocumentSummary
+  onPress?: (documentId: string) => void
+}) {
   return (
-    <View style={styles.card}>
+    <Pressable onPress={() => onPress?.(document.id)} style={styles.card}>
       <Text style={styles.title}>{document.displayName}</Text>
       <Text style={styles.meta}>{document.fileType.toUpperCase()}</Text>
       <Text style={styles.meta}>{document.textLength} chars</Text>
       {document.pageCount !== null ? <Text style={styles.meta}>{document.pageCount} pages</Text> : null}
       <IndexJobBadge status={document.indexStatus} />
-    </View>
+    </Pressable>
   )
 }
 

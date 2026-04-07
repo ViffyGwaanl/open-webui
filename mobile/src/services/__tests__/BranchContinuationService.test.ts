@@ -58,11 +58,12 @@ describe('BranchContinuationService', () => {
         }
       })),
       createThread: jest.fn(async () => ({ id: 'thread-child-1' })),
-      insertTurns: jest.fn(async () => {})
+      insertTurns: jest.fn(async () => {}),
+      linkContinuationThread: jest.fn(async () => {})
     }
     const service = new BranchContinuationService({
       repositories: repositories as never,
-      createId: createIdSequence('thread-child-1', 'turn-child-1'),
+      createId: createIdSequence('thread-child-1', 'turn-copy-1', 'turn-copy-2', 'turn-child-1'),
       now: () => 50
     })
 
@@ -82,16 +83,27 @@ describe('BranchContinuationService', () => {
     )
     expect(repositories.insertTurns).toHaveBeenCalledWith(
       'thread-child-1',
-      expect.arrayContaining([
-        expect.objectContaining({ role: 'user', contentJson: JSON.stringify([{ type: 'text', text: 'First question' }]) }),
+      [
         expect.objectContaining({
+          id: 'turn-copy-1',
+          role: 'user',
+          contentJson: JSON.stringify([{ type: 'text', text: 'First question' }])
+        }),
+        expect.objectContaining({
+          id: 'turn-copy-2',
+          role: 'user',
+          contentJson: JSON.stringify([{ type: 'text', text: 'Compare these answers' }])
+        }),
+        expect.objectContaining({
+          id: 'turn-child-1',
           role: 'assistant',
           providerProfileId: 'openai-main',
           modelId: 'gpt-4.1',
           contentJson: JSON.stringify([{ type: 'text', text: 'Selected branch answer' }])
         })
-      ])
+      ]
     )
+    expect(repositories.linkContinuationThread).toHaveBeenCalledWith('branch-1', 'thread-child-1')
     expect(result).toEqual(
       expect.objectContaining({
         id: 'thread-child-1',

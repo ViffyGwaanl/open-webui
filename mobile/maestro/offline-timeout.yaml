@@ -1,0 +1,17 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "OpenAI"
+- tapOn: "Base URL"
+- eraseText
+- inputText: "https://127.0.0.1:1/v1"
+- tapOn: "API key"
+- inputText: "offline-test"
+- tapOn: "Save provider"
+- tapOn: "Threads"
+- tapOn: "Open starter thread"
+- tapOn: "Ask anything"
+- inputText: "Trigger offline failure handling."
+- tapOn: "Send"
+- assertVisible: "Request failed"
