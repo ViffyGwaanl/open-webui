@@ -6,7 +6,7 @@
 
 ## 背景
 
-本设计用于回答：当前 `open-webui` 项目是否可以演进为一个满足以下条件的独立 iOS 应用，以及相应的工程实现路线应如何选择：
+本设计用于回答：当前 `open-webui` 项目是否可以演进为一个同时面向 Apple 与 Android 平台的独立原生移动应用，以及相应的工程实现路线应如何选择：
 
 - 不依赖自建服务端部署
 - 使用用户自行填写的 `API key + base URL`
@@ -42,8 +42,9 @@
 
 - 使用一套共享的跨平台代码基线
 - 架构必须对 iOS、iPadOS、Android 保持可移植性
-- `v1.0` 的发布级验收必须在 iPhone 与 iPad 上达标
-- Android 属于目标产品架构的一部分，但不能因为照顾 Android 而牺牲 Apple 平台首发质量
+- `v1.0` 的发布级验收必须同时在 iPhone、iPad、Android 上达标
+- Apple 与 Android 都是首发平台
+- 允许跨平台复用，但不能通过降低任一平台质量标准来换取另一平台首发
 
 ## 为什么不直接复用 Open WebUI
 
@@ -111,10 +112,37 @@
 - 交付一个无需用户部署自有后端即可工作的独立原生客户端
 - 保持实现架构是跨平台的，而不是仅面向 Apple 单平台
 - 支持高质量的单模型聊天与多模型对比
+- 在移动端可成立的范围内，功能细节对标 `open-webui`
 - 允许用户配置 OpenAI、Gemini、Claude 的官方或自定义 endpoint
 - 支持 `txt`、`md`、`pdf` 的本地导入、索引与检索
 - 所有会话、compare run、文档、索引与设置均本地持久化
-- 提供发布级的 iPhone 与 iPad 使用体验
+- 提供发布级的 iPhone、iPad、Android 使用体验
+
+## 功能细节对标原则
+
+目标产品应当在“移动端成立”的范围内，对标 `open-webui` 的功能细节完成度，而不是只做能力名义上的覆盖。
+
+这意味着产品应有意识地对标 `open-webui` 在以下移动端可成立的交互细节：
+
+- 模型选择与快速切换
+- compare mode 编排与结果检查
+- regenerate、retry、copy、export、continue 等核心响应动作
+- 每个 turn 的 RAG 使用方式与 evidence 查看能力
+- attachment handling 与 file-aware chat 流程
+- 在 provider 支持时展示 reasoning 或 thinking
+- 在可用时展示 citations 或 source
+- 在移动端仍然实用的 chat-history navigation、search、pinning 与 thread organization
+- 会实质性影响聊天行为的 provider 与 per-model settings
+
+这并不意味着照搬桌面端或服务端特性。
+
+明确不属于该对标原则的内容：
+
+- server-centric administration
+- group 与 channel 相关功能
+- 桌面端特有的文件系统能力
+- terminal 与 tool-server 集成
+- 依赖大屏桌面假设、放到移动端会损伤体验的交互模式
 
 ## 非目标
 
@@ -135,6 +163,7 @@
 - compare mode
 - 可选 judge summary
 - 从任一对比分支继续对话
+- 核心 chat 与 compare 交互中对 `open-webui` 的移动端可行细节对标
 - `txt`、`md`、`pdf` 的本地文件导入
 - 轻量本地 RAG
 - 会话导出
@@ -556,9 +585,10 @@ Embeddings 使用外部能力，并且与 generation 独立配置。
 
 ### 产品完成度
 
-- iPhone 与 iPad 都是明确目标平台
+- iPhone、iPad、Android 都是明确的首发目标平台
 - provider 配置对非专家用户也可理解
 - compare mode 在手机上必须可用，而不是只适合平板
+- 在核心 chat、compare、attachment、evidence 流程中，移动端可行的 `open-webui` 交互细节必须得到覆盖
 
 ## 测试策略
 
@@ -605,6 +635,9 @@ Embeddings 使用外部能力，并且与 generation 独立配置。
 - large iPhone
 - iPad portrait
 - iPad landscape
+- representative small Android phone
+- representative large Android phone
+- representative Android tablet，如果首发安装包包含平板支持
 
 必须覆盖的场景：
 
@@ -675,6 +708,7 @@ App Review 不能假设审核员拥有自己的 AI provider key。
 ### Phase 4: Polish and Release
 
 - iPad optimization
+- Android 平台专项 polish 与回归
 - performance work
 - recovery hardening
 - QA automation

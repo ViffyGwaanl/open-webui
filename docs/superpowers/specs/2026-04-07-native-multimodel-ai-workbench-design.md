@@ -6,7 +6,7 @@ Approved in conversational design review. Ready for implementation planning afte
 
 ## Context
 
-This design answers whether the current `open-webui` project can be turned into a standalone iOS-capable app that:
+This design answers whether the current `open-webui` project can be turned into a standalone native mobile app for Apple and Android platforms that:
 
 - does not require a self-hosted backend
 - uses user-supplied `API key + base URL`
@@ -33,8 +33,9 @@ Platform stance:
 
 - one shared cross-platform codebase
 - architecture must remain portable to iOS, iPadOS, and Android
-- release-quality sign-off for v1.0 is required on iPhone and iPad
-- Android is part of the intended product architecture, but not allowed to drive architecture compromises that weaken the Apple-platform launch quality
+- release-quality sign-off for v1.0 is required on iPhone, iPad, and Android
+- Apple and Android are both launch platforms
+- cross-platform reuse is required, but launch quality on any one platform must not be achieved by lowering the quality bar on the others
 
 Primary architectural decisions:
 
@@ -111,10 +112,37 @@ Not suitable to copy as-is:
 - ship a standalone native client that works without deploying a user-owned server
 - keep the implementation architecture cross-platform rather than Apple-only
 - support high-quality single-model chat and multimodel comparison
+- benchmark feature-detail quality against the mobile-feasible subset of `open-webui`
 - let users configure official or custom endpoints for OpenAI, Gemini, and Claude
 - support local import, indexing, and retrieval for `txt`, `md`, and `pdf`
 - persist all conversations, compare runs, documents, indexes, and settings locally
-- deliver release-grade iPhone and iPad experiences
+- deliver release-grade iPhone, iPad, and Android experiences
+
+## Feature Detail Benchmark Principle
+
+The target product should match `open-webui` in feature detail wherever those behaviors remain coherent on a native mobile client.
+
+This means the product should intentionally benchmark against `open-webui` for mobile-feasible interaction details such as:
+
+- model selection and fast model switching
+- compare-mode orchestration and response inspection
+- regeneration, retry, copy, export, and continuation actions
+- per-turn RAG usage and evidence inspection
+- attachment handling and file-aware chat flows
+- reasoning or thinking display when providers expose it
+- citations or source rendering when available
+- chat-history navigation, search, pinning, and thread organization where mobile UX remains practical
+- provider and per-model settings that materially affect chat behavior
+
+This does not mean literal desktop or server feature parity.
+
+Explicit exclusions from the benchmark principle:
+
+- server-centric administration
+- group and channel features
+- desktop-only file system affordances
+- terminal and tool-server integrations
+- interaction patterns that depend on large-screen desktop assumptions and degrade the mobile experience
 
 ## Non-Goals
 
@@ -135,6 +163,7 @@ Included:
 - compare mode
 - optional judge summary
 - branch continuation from any compared answer
+- mobile-feasible `open-webui` detail parity for core chat and compare interactions
 - local file import for `txt`, `md`, `pdf`
 - lightweight local RAG
 - conversation export
@@ -556,9 +585,10 @@ On restart:
 
 ### Product Completeness
 
-- iPhone and iPad are both intentional targets
+- iPhone, iPad, and Android are all intentional launch targets
 - provider configuration is understandable for non-expert users
 - compare mode is usable on phone, not just tablet
+- mobile-feasible `open-webui` interaction details are present in the core chat, compare, attachment, and evidence flows
 
 ## Testing Strategy
 
@@ -605,6 +635,9 @@ Required device coverage:
 - large iPhone
 - iPad portrait
 - iPad landscape
+- representative small Android phone
+- representative large Android phone
+- representative Android tablet, if tablet support is included in the launch binary
 
 Required scenarios:
 
@@ -675,6 +708,7 @@ This is not an MVP decomposition. It is a release-grade build order.
 ### Phase 4: Polish and Release
 
 - iPad optimization
+- Android-specific polish and regression work
 - performance work
 - recovery hardening
 - QA automation
