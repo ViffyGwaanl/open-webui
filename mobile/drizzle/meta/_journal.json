@@ -15,6 +15,13 @@
       "when": 1775549880285,
       "tag": "0001_aberrant_catseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775552067626,
+      "tag": "0002_worried_the_stranger",
+      "breakpoints": true
     }
   ]
 }

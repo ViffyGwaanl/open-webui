@@ -1,0 +1,5 @@
+export { documentChunks } from './documentChunks'
+export { documentChunksFts } from './documentChunksFts'
+export { documents } from './documents'
+export { documentTexts } from './documentTexts'
+export { indexJobs } from './indexJobs'
