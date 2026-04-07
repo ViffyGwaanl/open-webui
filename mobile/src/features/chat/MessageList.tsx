@@ -1,13 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native'
 
-export function MessageList({ messages }: { messages: string[] }) {
+import type { ThreadTimelineItem } from '../../services/ThreadService'
+import { CompareRunCard } from '../compare/CompareRunCard'
+
+export function MessageList({ items }: { items: ThreadTimelineItem[] }) {
   return (
     <View style={styles.list}>
-      {messages.map((message, index) => (
-        <Text key={`${message}-${index}`} style={styles.message}>
-          {message}
-        </Text>
-      ))}
+      {items.map((item) =>
+        item.kind === 'compare_run' ? (
+          <CompareRunCard key={item.id} run={item} />
+        ) : (
+          <Text key={item.id} style={styles.message}>
+            {item.text}
+          </Text>
+        )
+      )}
     </View>
   )
 }
