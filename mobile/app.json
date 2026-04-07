@@ -7,10 +7,10 @@
     "plugins": ["expo-router"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.viffygwaanl.openwebuinative"
+      "bundleIdentifier": "com.openwebui.native"
     },
     "android": {
-      "package": "com.viffygwaanl.openwebuinative"
+      "package": "com.openwebui.native"
     }
   }
 }
