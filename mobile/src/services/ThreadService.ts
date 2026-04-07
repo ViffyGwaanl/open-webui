@@ -88,9 +88,10 @@ export class ThreadService {
   ) {}
 
   async createUserTurn(threadId: string, prompt: string) {
+    const turnId = createId('turn')
     const now = Date.now()
     await this.threadRepository.insertTurn({
-      id: createId('turn'),
+      id: turnId,
       threadId,
       role: 'user',
       providerProfileId: null,
@@ -101,6 +102,8 @@ export class ThreadService {
       createdAt: now,
       updatedAt: now
     } satisfies NewTurnRecord)
+
+    return turnId
   }
 
   async appendAssistantDelta(threadId: string, text: string) {

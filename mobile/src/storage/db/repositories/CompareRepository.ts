@@ -3,6 +3,7 @@ import {
   desc,
   eq,
   inArray,
+  type InferInsertModel,
   type InferSelectModel
 } from 'drizzle-orm'
 
@@ -12,6 +13,9 @@ import { compareBranches, compareRuns, judgeRuns } from '../schema'
 type CompareRunRecord = InferSelectModel<typeof compareRuns>
 type CompareBranchRecord = InferSelectModel<typeof compareBranches>
 type JudgeRunRecord = InferSelectModel<typeof judgeRuns>
+export type NewCompareRunRecord = InferInsertModel<typeof compareRuns>
+export type NewCompareBranchRecord = InferInsertModel<typeof compareBranches>
+export type NewJudgeRunRecord = InferInsertModel<typeof judgeRuns>
 
 export type TimelineCompareBranch = {
   id: string
@@ -59,6 +63,61 @@ function mapBranch(branch: CompareBranchRecord): TimelineCompareBranch {
 
 export class CompareRepository {
   constructor(private readonly database = db) {}
+
+  async insertRun(record: NewCompareRunRecord) {
+    await this.database.insert(compareRuns).values(record)
+  }
+
+  async insertBranches(records: NewCompareBranchRecord[]) {
+    if (records.length === 0) {
+      return
+    }
+
+    await this.database.insert(compareBranches).values(records)
+  }
+
+  async updateRun(
+    compareRunId: string,
+    patch: Partial<
+      Pick<
+        CompareRunRecord,
+        | 'status'
+        | 'compareConfigJson'
+        | 'judgeConfigJson'
+        | 'retrievalContextJson'
+        | 'aggregateUsageJson'
+        | 'aggregateTimingJson'
+        | 'updatedAt'
+      >
+    >
+  ) {
+    await this.database.update(compareRuns).set(patch).where(eq(compareRuns.id, compareRunId))
+  }
+
+  async updateBranch(
+    branchId: string,
+    patch: Partial<
+      Pick<
+        CompareBranchRecord,
+        'status' | 'contentJson' | 'usageJson' | 'latencyMs' | 'errorJson' | 'attemptCount' | 'updatedAt'
+      >
+    >
+  ) {
+    await this.database.update(compareBranches).set(patch).where(eq(compareBranches.id, branchId))
+  }
+
+  async insertJudgeRun(record: NewJudgeRunRecord) {
+    await this.database.insert(judgeRuns).values(record)
+  }
+
+  async updateJudgeRun(
+    judgeRunId: string,
+    patch: Partial<
+      Pick<JudgeRunRecord, 'status' | 'contentJson' | 'usageJson' | 'latencyMs' | 'errorJson' | 'updatedAt'>
+    >
+  ) {
+    await this.database.update(judgeRuns).set(patch).where(eq(judgeRuns.id, judgeRunId))
+  }
 
   async listTimelineCards(threadId: string): Promise<TimelineCompareRunCard[]> {
     const runs = await this.database
