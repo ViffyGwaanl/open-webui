@@ -1,3 +1,5 @@
+import type { StreamSink } from '../chat/streamEvents'
+
 export type ProviderPreset = 'openai' | 'gemini' | 'claude'
 
 export type ProviderProfileInput = {
@@ -27,6 +29,27 @@ export type ModelDescriptor = {
 
 export type AdapterModelDescriptor = Omit<ModelDescriptor, 'providerProfileId'>
 
+export type ProviderTextRequest = {
+  modelId: string
+  prompt: string
+}
+
+export type ProviderEmbeddingRequest = {
+  modelId: string
+  texts: string[]
+}
+
 export interface ProviderAdapter {
   listModels(profile: ProviderProfileRecord, apiKey: string): Promise<AdapterModelDescriptor[]>
+  streamText(
+    profile: ProviderProfileRecord,
+    apiKey: string,
+    request: ProviderTextRequest,
+    sink: StreamSink
+  ): Promise<void>
+  embedTexts(
+    profile: ProviderProfileRecord,
+    apiKey: string,
+    request: ProviderEmbeddingRequest
+  ): Promise<number[][]>
 }
