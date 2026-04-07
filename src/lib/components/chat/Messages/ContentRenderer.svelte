@@ -1,30 +1,71 @@
 <script>
-	import { onDestroy, onMount, tick, getContext, createEventDispatcher } from 'svelte';
+	import { onDestroy, onMount, tick, getContext } from 'svelte';
 	const i18n = getContext('i18n');
-	const dispatch = createEventDispatcher();
 
 	import Markdown from './Markdown.svelte';
-	import { chatId, mobile, showArtifacts, showControls, showOverview } from '$lib/stores';
+	import {
+		artifactCode,
+		chatId,
+		mobile,
+		settings,
+		showArtifacts,
+		showControls,
+		showEmbeds
+	} from '$lib/stores';
 	import FloatingButtons from '../ContentRenderer/FloatingButtons.svelte';
 	import { createMessagesList } from '$lib/utils';
 
 	export let id;
 	export let content;
+
 	export let history;
+	export let messageId;
+
+	export let selectedModels = [];
+
+	export let done = true;
 	export let model = null;
 	export let sources = null;
 
 	export let save = false;
+	export let preview = false;
 	export let floatingButtons = true;
 
-	export let onSourceClick = () => {};
-	export let onTaskClick = () => {};
+	export let editCodeBlock = true;
+	export let topPadding = false;
 
-	export let onAddMessages = () => {};
+	export let onSave = (e) => {};
+	export let onSourceClick = (e) => {};
+	export let onTaskClick = (e) => {};
+	export let onAddMessages = (e) => {};
 
 	let contentContainerElement;
-
 	let floatingButtonsElement;
+
+	let sourceIds = [];
+	$: getSourceIds(sources);
+
+	const getSourceIds = (sources) => {
+		const result = [];
+		for (const source of sources ?? []) {
+			for (let index = 0; index < (source.document ?? []).length; index++) {
+				if (model?.info?.meta?.capabilities?.citations == false) {
+					result.push('N/A');
+					continue;
+				}
+				const metadata = source.metadata?.[index];
+				const id = metadata?.source ?? 'N/A';
+				if (metadata?.name) {
+					result.push(metadata.name);
+				} else if (id.startsWith('http://') || id.startsWith('https://')) {
+					result.push(id);
+				} else {
+					result.push(source?.source?.name ?? id);
+				}
+			}
+		}
+		sourceIds = [...new Set(result)];
+	};
 
 	const updateButtonPosition = (event) => {
 		const buttonsContainerElement = document.getElementById(`floating-buttons-${id}`);
@@ -122,62 +163,50 @@
 		{content}
 		{model}
 		{save}
-		sourceIds={(sources ?? []).reduce((acc, s) => {
-			let ids = [];
-			s.document.forEach((document, index) => {
-				if (model?.info?.meta?.capabilities?.citations == false) {
-					ids.push('N/A');
-					return ids;
-				}
-
-				const metadata = s.metadata?.[index];
-				const id = metadata?.source ?? 'N/A';
-
-				if (metadata?.name) {
-					ids.push(metadata.name);
-					return ids;
-				}
-
-				if (id.startsWith('http://') || id.startsWith('https://')) {
-					ids.push(id);
-				} else {
-					ids.push(s?.source?.name ?? id);
-				}
-
-				return ids;
-			});
-
-			acc = [...acc, ...ids];
-
-			// remove duplicates
-			return acc.filter((item, index) => acc.indexOf(item) === index);
-		}, [])}
+		{preview}
+		{done}
+		{editCodeBlock}
+		{topPadding}
+		{sourceIds}
 		{onSourceClick}
 		{onTaskClick}
-		on:update={(e) => {
-			dispatch('update', e.detail);
-		}}
-		on:code={(e) => {
-			const { lang, code } = e.detail;
+		{onSave}
+		onUpdate={async (token) => {
+			const { lang, text: code } = token;
 
 			if (
+				($settings?.detectArtifacts ?? true) &&
 				(['html', 'svg'].includes(lang) || (lang === 'xml' && code.includes('svg'))) &&
 				!$mobile &&
 				$chatId
 			) {
+				await tick();
 				showArtifacts.set(true);
 				showControls.set(true);
 			}
 		}}
+		onPreview={async (value) => {
+			console.log('Preview', value);
+			await artifactCode.set(value);
+			await showControls.set(true);
+			await showArtifacts.set(true);
+			await showEmbeds.set(false);
+		}}
 	/>
 </div>
 
-{#if floatingButtons && model}
+{#if floatingButtons}
 	<FloatingButtons
 		bind:this={floatingButtonsElement}
 		{id}
-		model={model?.id}
-		messages={createMessagesList(history, id)}
+		{messageId}
+		actions={$settings?.floatingActionButtons ?? []}
+		model={(selectedModels ?? []).includes(model?.id)
+			? model?.id
+			: (selectedModels ?? []).length > 0
+				? selectedModels.at(0)
+				: (model?.id ?? null)}
+		messages={createMessagesList(history, messageId)}
 		onAdd={({ modelId, parentId, messages }) => {
 			console.log(modelId, parentId, messages);
 			onAddMessages({ modelId, parentId, messages });

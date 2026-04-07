@@ -5,10 +5,18 @@ on:
     branches:
       - main
       - dev
+    paths:
+      - 'backend/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
   pull_request:
     branches:
       - main
       - dev
+    paths:
+      - 'backend/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
 
 jobs:
   build:
@@ -17,23 +25,22 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.11]
+        python-version:
+          - 3.11.x
+          - 3.12.x
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '${{ matrix.python-version }}'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black
+          pip install "ruff>=0.15.5"
 
-      - name: Format backend
-        run: npm run format:backend
-
-      - name: Check for changes after format
-        run: git diff --exit-code
+      - name: Ruff format check
+        run: ruff format --check . --exclude .venv --exclude venv

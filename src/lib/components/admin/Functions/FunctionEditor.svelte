@@ -4,6 +4,7 @@
 
 	const i18n = getContext('i18n');
 
+	import { nameToId } from '$lib/utils';
 	import CodeEditor from '$lib/components/common/CodeEditor.svelte';
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
 	import Badge from '$lib/components/common/Badge.svelte';
@@ -36,7 +37,7 @@
 	};
 
 	$: if (name && !edit && !clone) {
-		id = name.replace(/\s+/g, '_').toLowerCase();
+		id = nameToId(name);
 	}
 
 	let codeEditor;
@@ -276,11 +277,11 @@ class Pipe:
 			content = _content;
 			await tick();
 
-			if (res) {
-				console.log('Code formatted successfully');
-
-				saveHandler();
+			if (!res) {
+				console.warn('Code formatting failed or was skipped, saving unformatted code');
 			}
+
+			saveHandler();
 		}
 	};
 </script>
@@ -387,7 +388,7 @@ class Pipe:
 					<div class="flex-1 pr-3">
 						<div class="text-xs text-gray-500 line-clamp-2">
 							<span class=" font-semibold dark:text-gray-200">{$i18n.t('Warning:')}</span>
-							{$i18n.t('Functions allow arbitrary code execution')} <br />—
+							{$i18n.t('Functions allow arbitrary code execution.')} <br />—
 							<span class=" font-medium dark:text-gray-400"
 								>{$i18n.t(`don't install random functions from sources you don't trust.`)}</span
 							>

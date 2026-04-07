@@ -1,17 +1,20 @@
 <script>
+	import { toast } from 'svelte-sonner';
 	import { getContext, onMount, tick } from 'svelte';
 
 	const i18n = getContext('i18n');
 
-	import CodeEditor from '$lib/components/common/CodeEditor.svelte';
 	import { goto } from '$app/navigation';
+	import { user } from '$lib/stores';
+	import { updateToolAccessGrants } from '$lib/apis/tools';
+
+	import { nameToId } from '$lib/utils';
+	import CodeEditor from '$lib/components/common/CodeEditor.svelte';
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
-	import Badge from '$lib/components/common/Badge.svelte';
 	import ChevronLeft from '$lib/components/icons/ChevronLeft.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import LockClosed from '$lib/components/icons/LockClosed.svelte';
 	import AccessControlModal from '../common/AccessControlModal.svelte';
-	import { user } from '$lib/stores';
 
 	let formElement = null;
 	let loading = false;
@@ -30,7 +33,7 @@
 		description: ''
 	};
 	export let content = '';
-	export let accessControl = null;
+	export let accessGrants = [];
 
 	let _content = '';
 
@@ -43,29 +46,27 @@
 	};
 
 	$: if (name && !edit && !clone) {
-		id = name.replace(/\s+/g, '_').toLowerCase();
+		id = nameToId(name);
 	}
 
 	let codeEditor;
 	let boilerplate = `import os
 import requests
 from datetime import datetime
-
+from pydantic import BaseModel, Field
 
 class Tools:
     def __init__(self):
         pass
 
-    # Add your custom tools using pure Python code here, make sure to add type hints
-    # Use Sphinx-style docstrings to document your tools, they will be used for generating tools specifications
-    # Please refer to function_calling_filter_pipeline.py file from pipelines project for an example
-
+    # Add your custom tools using pure Python code here, make sure to add type hints and descriptions
+	
     def get_user_name_and_email_and_id(self, __user__: dict = {}) -> str:
         """
         Get the user name, Email and ID from the user object.
         """
 
-        # Do not include :param for __user__ in the docstring as it should not be shown in the tool's specification
+        # Do not include a descrption for __user__ as it should not be shown in the tool's specification
         # The session user object will be passed as a parameter when the function is called
 
         print(__user__)
@@ -86,7 +87,6 @@ class Tools:
     def get_current_time(self) -> str:
         """
         Get the current time in a more human-readable format.
-        :return: The current time.
         """
 
         now = datetime.now()
@@ -97,10 +97,14 @@ class Tools:
 
         return f"Current Date and Time = {current_date}, {current_time}"
 
-    def calculator(self, equation: str) -> str:
+    def calculator(
+        self,
+        equation: str = Field(
+            ..., description="The mathematical equation to calculate."
+        ),
+    ) -> str:
         """
         Calculate the result of an equation.
-        :param equation: The equation to calculate.
         """
 
         # Avoid using eval in production code
@@ -112,12 +116,16 @@ class Tools:
             print(e)
             return "Invalid equation"
 
-    def get_current_weather(self, city: str) -> str:
+    def get_current_weather(
+        self,
+        city: str = Field(
+            "New York, NY", description="Get the current weather for a given city."
+        ),
+    ) -> str:
         """
         Get the current weather for a given city.
-        :param city: The name of the city to get the weather for.
-        :return: The current weather information or an error message.
         """
+
         api_key = os.getenv("OPENWEATHER_API_KEY")
         if not api_key:
             return (
@@ -156,7 +164,7 @@ class Tools:
 			name,
 			meta,
 			content,
-			access_control: accessControl
+			access_grants: accessGrants
 		});
 	};
 
@@ -171,20 +179,32 @@ class Tools:
 			content = _content;
 			await tick();
 
-			if (res) {
-				console.log('Code formatted successfully');
-
-				saveHandler();
+			if (!res) {
+				console.warn('Code formatting failed or was skipped, saving unformatted code');
 			}
+
+			saveHandler();
 		}
 	};
 </script>
 
 <AccessControlModal
 	bind:show={showAccessControlModal}
-	bind:accessControl
+	bind:accessGrants
 	accessRoles={['read', 'write']}
-	allowPublic={$user?.permissions?.sharing?.public_tools || $user?.role === 'admin'}
+	share={$user?.permissions?.sharing?.tools || $user?.role === 'admin'}
+	sharePublic={$user?.permissions?.sharing?.public_tools || $user?.role === 'admin'}
+	shareUsers={($user?.permissions?.access_grants?.allow_users ?? true) || $user?.role === 'admin'}
+	onChange={async () => {
+		if (edit && id) {
+			try {
+				await updateToolAccessGrants(localStorage.token, id, accessGrants);
+				toast.success($i18n.t('Saved'));
+			} catch (error) {
+				toast.error(`${error}`);
+			}
+		}
+	}}
 />
 
 <div class=" flex flex-col justify-between w-full overflow-y-auto h-full">
@@ -207,6 +227,7 @@ class Tools:
 							<Tooltip content={$i18n.t('Back')}>
 								<button
 									class="w-full text-left text-sm py-1.5 px-1 rounded-lg dark:text-gray-300 dark:hover:text-white hover:bg-black/5 dark:hover:bg-gray-850"
+									aria-label={$i18n.t('Back')}
 									on:click={() => {
 										goto('/workspace/tools');
 									}}
@@ -220,9 +241,10 @@ class Tools:
 						<div class="flex-1">
 							<Tooltip content={$i18n.t('e.g. My Tools')} placement="top-start">
 								<input
-									class="w-full text-2xl font-medium bg-transparent outline-hidden font-primary"
+									class="w-full text-2xl bg-transparent outline-hidden"
 									type="text"
 									placeholder={$i18n.t('Tool Name')}
+									aria-label={$i18n.t('Tool Name')}
 									bind:value={name}
 									required
 								/>
@@ -257,6 +279,7 @@ class Tools:
 									class="w-full text-sm disabled:text-gray-500 bg-transparent outline-hidden"
 									type="text"
 									placeholder={$i18n.t('Tool ID')}
+									aria-label={$i18n.t('Tool ID')}
 									bind:value={id}
 									required
 									disabled={edit}
@@ -273,6 +296,7 @@ class Tools:
 								class="w-full text-sm bg-transparent outline-hidden"
 								type="text"
 								placeholder={$i18n.t('Tool Description')}
+								aria-label={$i18n.t('Tool Description')}
 								bind:value={meta.description}
 								required
 							/>
