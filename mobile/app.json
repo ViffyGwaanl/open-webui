@@ -1,23 +1,16 @@
 {
   "expo": {
-    "name": "Native Multimodel AI Workbench",
-    "slug": "native-multimodel-ai-workbench",
-    "scheme": "native-ai-workbench",
+    "name": "Open WebUI Native",
+    "slug": "open-webui-native",
+    "scheme": "openwebuinative",
     "version": "0.1.0",
-    "orientation": "default",
-    "userInterfaceStyle": "automatic",
-    "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
+    "plugins": ["expo-router"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.openwebui.nativeworkbench"
+      "bundleIdentifier": "com.viffygwaanl.openwebuinative"
     },
     "android": {
-      "package": "com.openwebui.nativeworkbench"
+      "package": "com.viffygwaanl.openwebuinative"
     }
   }
 }

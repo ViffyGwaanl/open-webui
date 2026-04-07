@@ -2,9 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "moduleResolution": "bundler",
-    "types": ["jest", "react", "react-native"],
-    "noEmit": true
+    "baseUrl": "."
   },
   "include": ["app", "src"]
 }

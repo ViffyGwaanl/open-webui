@@ -1,5 +1,5 @@
 module.exports = {
   preset: 'jest-expo',
-  clearMocks: true,
-  testMatch: ['<rootDir>/src/**/__tests__/**/*.test.ts']
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx']
 }
