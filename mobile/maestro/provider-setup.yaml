@@ -1,14 +1,24 @@
 appId: com.openwebui.mobile
 env:
-  OPENAI_API_KEY: ""
+  PROVIDER_PRESET: "OpenAI"
+  CURRENT_DISPLAY_NAME: "OpenAI Main"
+  DISPLAY_NAME: "OpenAI Main"
+  CURRENT_BASE_URL: "https://api.openai.com/v1"
+  BASE_URL: "https://api.openai.com/v1"
+  API_KEY: ""
 ---
 - launchApp
 - tapOn: "Settings"
 - assertVisible: "Settings"
-- tapOn: "Install Review Demo"
-- assertVisible: "Review Demo"
-- tapOn: "OpenAI"
+- tapOn: "${PROVIDER_PRESET}"
+- tapOn: "${CURRENT_DISPLAY_NAME}"
+- eraseText
+- inputText: "${DISPLAY_NAME}"
+- tapOn: "${CURRENT_BASE_URL}"
+- eraseText
+- inputText: "${BASE_URL}"
 - tapOn: "API key"
-- inputText: "${OPENAI_API_KEY}"
+- eraseText
+- inputText: "${API_KEY}"
 - tapOn: "Save provider"
-- assertVisible: "OpenAI Main"
+- assertVisible: "${DISPLAY_NAME}"

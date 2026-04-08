@@ -99,8 +99,10 @@ npm run typecheck
 
 ## Maestro Flows
 
-Smoke and QA drafts live in `mobile/maestro/`.
+Smoke and QA flows live in `mobile/maestro/`.
 
+- `backup-create.yaml`
+- `backup-restore.yaml`
 - `provider-setup.yaml`
 - `single-send.yaml`
 - `compare-send.yaml`
@@ -113,21 +115,41 @@ Smoke and QA drafts live in `mobile/maestro/`.
 
 These flows are parameterized. Override defaults with `maestro test -e KEY=value`.
 
+`single-send.yaml`, `compare-send.yaml`, `branch-continuation.yaml`, `judge.yaml`, `file-import.yaml`,
+`rag-evidence.yaml`, and `kill-recovery.yaml` are built around the local `review-demo` path, so they
+do not need third-party API keys.
+
+`provider-setup.yaml` supports a real provider profile save path. `CURRENT_DISPLAY_NAME` and
+`CURRENT_BASE_URL` are the visible field values before replacement, so override them when you switch
+away from the default OpenAI preset.
+
 Example:
 
 ```bash
 maestro test \
-  -e PROVIDER_PRESET="OpenAI" \
-  -e DISPLAY_NAME="OpenAI Main" \
-  -e BASE_URL="https://api.openai.com/v1" \
-  -e API_KEY="sk-..." \
+  -e PROVIDER_PRESET="Gemini" \
+  -e CURRENT_DISPLAY_NAME="Gemini Main" \
+  -e DISPLAY_NAME="Gemini Main" \
+  -e CURRENT_BASE_URL="https://generativelanguage.googleapis.com/v1beta" \
+  -e BASE_URL="https://generativelanguage.googleapis.com/v1beta" \
+  -e API_KEY="AIza..." \
   mobile/maestro/provider-setup.yaml
+```
+
+`backup-create.yaml` validates local backup creation. `backup-restore.yaml` requires a previously
+created device-local backup URI:
+
+```bash
+maestro test \
+  -e BACKUP_URI="file:///data/user/0/com.openwebui.mobile/files/backups/workspace-1712550000000.json" \
+  mobile/maestro/backup-restore.yaml
 ```
 
 ## Release Documentation
 
 Release docs live in `docs/superpowers/release/`.
 
+- `native-mobile-rc-status.md`
 - `native-mobile-review-notes.md`
 - `native-mobile-manual-qa.md`
 - `native-mobile-privacy-disclosure.md`

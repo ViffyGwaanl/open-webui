@@ -44,6 +44,9 @@ After install, App Review can validate:
 6. Tap `Continue` on one branch and confirm a new thread opens.
 7. Switch to `RAG`, send a prompt, and confirm evidence appears from `review-demo-guide.md`.
 8. Return to `Settings` and run `Create Backup`.
+9. Copy the generated backup URI from the success alert.
+10. Paste that URI into `Backup file URI` and tap `Restore Backup`.
+11. Confirm the `Restore Completed` alert appears with restored provider and document counts.
 
 ## Important Constraints
 

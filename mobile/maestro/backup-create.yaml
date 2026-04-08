@@ -1,0 +1,8 @@
+appId: com.openwebui.mobile
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Install Review Demo"
+- tapOn: "Create Backup"
+- assertVisible: "Backup Created"
+- assertVisible: "Saved local workspace backup to"

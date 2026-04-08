@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router'
 
-import { WORKSPACE_TABS } from '../../src/app/workspaceTabs'
+import { WORKSPACE_TABS } from '../../src/ui/layout/workspaceTabs'
 
 export default function WorkspaceTabsLayout() {
   return (

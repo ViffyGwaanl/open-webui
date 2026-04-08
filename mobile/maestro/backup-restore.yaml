@@ -1,0 +1,10 @@
+appId: com.openwebui.mobile
+env:
+  BACKUP_URI: ""
+---
+- launchApp
+- tapOn: "Settings"
+- tapOn: "Backup file URI"
+- inputText: "${BACKUP_URI}"
+- tapOn: "Restore Backup"
+- assertVisible: "Restore Completed"

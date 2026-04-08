@@ -14,4 +14,4 @@ appId: com.openwebui.mobile
 - tapOn: "Ask anything"
 - inputText: "Trigger offline failure handling."
 - tapOn: "Send"
-- assertVisible: "Request failed"
+- assertVisible: "Connection Failed"
